@@ -15,7 +15,7 @@ import java.util.*;
 public class BeerServiceImpl implements BeerService {
     private final Map<UUID, Beer> beerMap;
 
-    public BeerServiceImpl(Map<UUID, Beer> beerMap) {
+    public BeerServiceImpl() {
         this.beerMap = new HashMap<>();
 
         Beer beer1 = Beer.builder()
