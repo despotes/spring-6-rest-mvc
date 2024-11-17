@@ -98,4 +98,9 @@ public class BeerServiceImpl implements BeerService {
         // it's not needed because it's already modifying the reference Object
         beerMap.put(existing.getId(), existing);
     }
+
+    @Override
+    public void deteteById(UUID beerId) {
+        beerMap.remove(beerId);
+    }
 }
