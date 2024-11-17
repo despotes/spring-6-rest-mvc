@@ -1,9 +1,8 @@
 package guru.springframework.spring6restmvc.controllers;
 
 
-import guru.springframework.spring6restmvc.model.Beer;
+import guru.springframework.spring6restmvc.model.BeerDTO;
 import guru.springframework.spring6restmvc.services.BeerService;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -24,7 +23,7 @@ public class BeerController {
     private final BeerService beerService;
 
     @PatchMapping(BEER_PATH_PATH_ID)
-    ResponseEntity updateBeerPatchrById(@PathVariable UUID beerId, @RequestBody Beer beer) {
+    ResponseEntity updateBeerPatchrById(@PathVariable UUID beerId, @RequestBody BeerDTO beer) {
         beerService.patchBeerById(beerId, beer);
 
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -40,7 +39,7 @@ public class BeerController {
     }
 
     @PutMapping(BEER_PATH_PATH_ID)
-    public ResponseEntity<Beer> updateById(@PathVariable("beerId") UUID beerId, @RequestBody Beer beer) {
+    public ResponseEntity<BeerDTO> updateById(@PathVariable("beerId") UUID beerId, @RequestBody BeerDTO beer) {
 
         beerService.updateBeerById(beerId, beer);
 
@@ -49,9 +48,9 @@ public class BeerController {
 
 
     @PostMapping(BEER_PATH)
-    public ResponseEntity<Beer> handleePost(@RequestBody Beer beer) {
+    public ResponseEntity<BeerDTO> handleePost(@RequestBody BeerDTO beer) {
 
-        Beer savedBeer = beerService.saveBeer(beer);
+        BeerDTO savedBeer = beerService.saveBeer(beer);
 
         HttpHeaders headers = new HttpHeaders();
         headers.add("Location","/api/v1/beer" + savedBeer.getId().toString());
@@ -60,12 +59,12 @@ public class BeerController {
     }
 
     @GetMapping(BEER_PATH)
-    public List<Beer> listBeers() {
+    public List<BeerDTO> listBeers() {
         return beerService.listBeers();
     }
 
     @GetMapping(BEER_PATH_PATH_ID)
-    public Beer getBearById(@PathVariable("beerId") UUID beerId){
+    public BeerDTO getBearById(@PathVariable("beerId") UUID beerId){
         log.debug("Get Beer by Id - id: {}", beerId.toString());
         return beerService.getBeerById(beerId).orElseThrow(NotFoundException::new);
     }
