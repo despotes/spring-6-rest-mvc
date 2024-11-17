@@ -83,7 +83,7 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public void pathCustomer(UUID customerId, Customer customer) {
+    public void patchCustomer(UUID customerId, Customer customer) {
         Customer existing = customerMap.get(customerId);
 
         if (StringUtils.hasText(customer.getCustomerName())) {
