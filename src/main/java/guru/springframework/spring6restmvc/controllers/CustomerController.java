@@ -13,7 +13,8 @@ import java.util.UUID;
 
 @AllArgsConstructor
 @RestController
-public class CustomerController {
+public class
+CustomerController {
     public static final String  CUSTOMER_PATH = "/api/v1/customer";
     public static final String  CUSTOMER_PATH_PATH_ID = CUSTOMER_PATH +  "/{customerId}";
     CustomerService customerService;
@@ -56,6 +57,6 @@ public class CustomerController {
 
     @GetMapping(CUSTOMER_PATH_PATH_ID)
     Customer getCustomer(@PathVariable("customerId")UUID customerId) {
-        return customerService.getCustomerById(customerId);
+        return customerService.getCustomerById(customerId).orElseThrow(NotFoundException::new);
     }
 }

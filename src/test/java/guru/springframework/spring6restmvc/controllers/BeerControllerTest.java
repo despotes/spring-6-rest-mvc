@@ -1,6 +1,5 @@
 package guru.springframework.spring6restmvc.controllers;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import guru.springframework.spring6restmvc.model.Beer;
 import guru.springframework.spring6restmvc.services.BeerService;
@@ -17,6 +16,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -124,11 +124,18 @@ class BeerControllerTest {
     }
 
     @Test
+    void getBearByIdNtFound() throws Exception {
+        given(beerService.getBeerById(any(UUID.class))).willReturn(Optional.empty());
+        mockMvc.perform(get(BeerController.BEER_PATH_PATH_ID, UUID.randomUUID()))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
     void getBearById() throws Exception {
         Beer testBeer = beerServiceImpl.listBeers().getFirst();
 
         // given(beerService.getBeerById(any(UUID.class))).willReturn(testBeer);
-        given(beerService.getBeerById(testBeer.getId())).willReturn(testBeer);
+        given(beerService.getBeerById(testBeer.getId())).willReturn(Optional.of(testBeer));
 
         mockMvc.perform(get(BeerController.BEER_PATH_PATH_ID, testBeer.getId())
                         .accept(MediaType.APPLICATION_JSON))
