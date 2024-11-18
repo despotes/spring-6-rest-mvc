@@ -31,6 +31,31 @@ class BeerControllerIT {
     @Autowired
     BeerMapper beerMapper;
 
+    @Test
+    void testPatchByIdNotFound() {
+        assertThrows(NotFoundException.class, () -> {
+            controller.updateBeerPatchrById(UUID.randomUUID(), BeerDTO.builder().build());
+        });
+    }
+
+    @Rollback
+    @Transactional
+    @Test
+    void testPatchBeerById(){
+        Beer beer = beerRepository.findAll().getFirst();
+        BeerDTO beerDTO = beerMapper.beerToBeerDto(beer);
+        beerDTO.setId(null);
+        beerDTO.setVersion(null);
+        final String beerName = "PATCHED";
+        beerDTO.setBeerName(beerName);
+
+        ResponseEntity responseEntity = controller.updateById(beer.getId(), beerDTO);
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatusCode.valueOf(204));
+
+        Optional<Beer> updatedBeer = beerRepository.findById(beer.getId());
+        assertThat(updatedBeer).map(Beer::getBeerName).hasValue(beerName);
+        assertThat(updatedBeer).map(Beer::getBeerStyle).hasValue(beerDTO.getBeerStyle());
+    }
 
     @Test
     void testDeleteByIdNotFound() {
