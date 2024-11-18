@@ -89,7 +89,7 @@ public class BeerServiceImpl implements BeerService {
     }
 
     @Override
-    public void updateBeerById(UUID beerId, BeerDTO beer) {
+    public Optional<BeerDTO> updateBeerById(UUID beerId, BeerDTO beer) {
         BeerDTO existing = beerMap.get(beerId);
         existing.setBeerName(beer.getBeerName());
         existing.setBeerStyle(beer.getBeerStyle());
@@ -98,6 +98,7 @@ public class BeerServiceImpl implements BeerService {
 
         // it's not needed because it's already modifying the reference Object
         beerMap.put(existing.getId(), existing);
+        return Optional.of(existing);
     }
 
     @Override
