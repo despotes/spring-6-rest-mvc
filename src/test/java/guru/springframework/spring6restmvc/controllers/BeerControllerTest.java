@@ -72,14 +72,16 @@ class BeerControllerTest {
     }
 
     @Test
-    void testDeteteBeer() throws Exception {
+    void testDeleteBeer() throws Exception {
         BeerDTO beer =  beerServiceImpl.listBeers().getFirst();
+
+        given(beerService.deleteById(beer.getId())).willReturn(true);
 
         mockMvc.perform(delete(BeerController.BEER_PATH_PATH_ID, beer.getId())
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNoContent());
 
-        verify(beerService).deteteById(uuidArgumentCaptor.capture());
+        verify(beerService).deleteById(uuidArgumentCaptor.capture());
 
         assertThat(beer.getId()).isEqualTo(uuidArgumentCaptor.getValue());
     }

@@ -33,7 +33,9 @@ public class BeerController {
     public ResponseEntity deleteById(@PathVariable("beerId") UUID beerId) {
 
         log.debug("Deleting Beer with id: {}", beerId);
-        beerService.deteteById(beerId);
+        if (!beerService.deleteById(beerId)){
+            throw new NotFoundException();
+        }
 
         return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
