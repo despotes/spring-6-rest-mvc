@@ -21,7 +21,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
@@ -105,6 +105,28 @@ class BeerControllerTest {
     }
 
     @Test
+    void testUpdateBeerValidation() throws Exception {
+        BeerDTO beerToUpdate = beerServiceImpl.listBeers().get(1);
+        BeerDTO beer = BeerDTO.builder().build();
+
+        given(beerService.updateBeerById(any(UUID.class), any(BeerDTO.class)))
+                .willReturn(Optional.of(beerToUpdate));
+
+        MvcResult mvcResult = mockMvc.perform(put(BeerController.BEER_PATH_PATH_ID, beerToUpdate.getId())
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(beer)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$..beerName", iterableWithSize(2)))
+                .andExpect(jsonPath("$..beerStyle", iterableWithSize(1)))
+                .andExpect(jsonPath("$..upc", iterableWithSize(2)))
+                .andExpect(jsonPath("$..price", iterableWithSize(1)))
+                .andReturn();
+
+        System.out.println(mvcResult.getResponse().getContentAsString());
+    }
+
+    @Test
     void testCreatedNewBeer() throws Exception {
         BeerDTO beer = beerServiceImpl.listBeers().getFirst();
         beer.setVersion(null);
@@ -121,7 +143,7 @@ class BeerControllerTest {
     }
 
     @Test
-    void testCreateBeerNullBeerName() throws Exception {
+    void testCreateBeerValidation() throws Exception {
         BeerDTO beer = BeerDTO.builder().build();
 
         given(beerService.saveBeer(any(BeerDTO.class))).willReturn(beerServiceImpl.listBeers().get(1));
@@ -131,7 +153,10 @@ class BeerControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(beer)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.length()", is(2)))
+                .andExpect(jsonPath("$..beerName", iterableWithSize(2)))
+                .andExpect(jsonPath("$..beerStyle", iterableWithSize(1)))
+                .andExpect(jsonPath("$..upc", iterableWithSize(2)))
+                .andExpect(jsonPath("$..price", iterableWithSize(1)))
                         .andReturn();
 
         System.out.println(mvcResult.getResponse().getContentAsString());
