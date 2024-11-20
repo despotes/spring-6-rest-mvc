@@ -2,6 +2,8 @@ package guru.springframework.spring6restmvc.bootstrap;
 
 import guru.springframework.spring6restmvc.repositories.BeerRepository;
 import guru.springframework.spring6restmvc.repositories.CustomerRepository;
+import guru.springframework.spring6restmvc.services.BeerCsvService;
+import guru.springframework.spring6restmvc.services.BeerService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,9 +25,12 @@ class BootstrapDataTest {
 
     BootstrapData bootstrapData;
 
+    @Autowired
+    BeerCsvService beerCsvService;
+
     @BeforeEach
     void setup(){
-        bootstrapData = new BootstrapData(customerRepository, beerRepository);
+        bootstrapData = new BootstrapData(customerRepository, beerRepository, beerCsvService);
     }
 
     @Test
