@@ -6,6 +6,7 @@ import guru.springframework.spring6restmvc.mappers.BeerMapper;
 import guru.springframework.spring6restmvc.model.BeerDTO;
 import guru.springframework.spring6restmvc.model.BeerStyle;
 import guru.springframework.spring6restmvc.repositories.BeerRepository;
+import org.hamcrest.core.IsNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,6 +55,34 @@ class BeerControllerIT {
     @BeforeEach
     void setup(){
         mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
+    }
+
+    @Test
+    void testListBeerStyleAndBeerNameShowInventoryTrue () throws Exception {
+        mockMvc.perform(get(BeerController.BEER_PATH)
+                        .queryParam("beerName", "IPA")
+                        .queryParam("beerStyle", BeerStyle.IPA.name())
+                        .queryParam("showInventory", "true"))
+                .andExpect(jsonPath("$.size()", is(310)))
+                .andExpect(jsonPath("$.[0].quantityOnHand").value(IsNull.notNullValue()));
+    }
+
+    @Test
+    void testListBeerStyleAndBeerNameShowInventoryFalse () throws Exception {
+        mockMvc.perform(get(BeerController.BEER_PATH)
+                        .queryParam("beerName", "IPA")
+                        .queryParam("beerStyle", BeerStyle.IPA.name())
+                        .queryParam("showInventory", "false"))
+                .andExpect(jsonPath("$.size()", is(310)))
+                .andExpect(jsonPath("$.[0].quantityOnHand").value(IsNull.nullValue()));
+    }
+
+    @Test
+    void testListBeerStyleAndBeerName () throws Exception {
+        mockMvc.perform(get(BeerController.BEER_PATH)
+                        .queryParam("beerName", "IPA")
+                        .queryParam("beerStyle", BeerStyle.IPA.name()))
+                .andExpect(jsonPath("$.size()", is(310)));
     }
 
     @Test
@@ -191,7 +220,7 @@ class BeerControllerIT {
 
     @Test
     void testListBeers() {
-        List<BeerDTO> dtos = controller.listBeers(null, null);
+        List<BeerDTO> dtos = controller.listBeers(null, null, false);
 
         assertThat(dtos.size()).isEqualTo(2413);
     }
@@ -201,7 +230,7 @@ class BeerControllerIT {
     @Test
     void testEmptyList() {
         beerRepository.deleteAll();
-        List<BeerDTO> dtos = controller.listBeers(null, null);
+        List<BeerDTO> dtos = controller.listBeers(null, null, false);
         assertThat(dtos.size()).isEqualTo(0);
     }
 }
