@@ -61,12 +61,16 @@ public class BeerServiceImpl implements BeerService {
     }
 
     @Override
-    public List<BeerDTO> listBeers(String beerName) {
+    public List<BeerDTO> listBeers(String beerName, BeerStyle beerStyle) {
         List<BeerDTO> beers = new ArrayList<>(beerMap.values());
-        if (StringUtils.hasText(beerName)) {
+        if (StringUtils.hasText(beerName) && beerStyle == null) {
             beers = beers.stream()
                     .filter(b -> b.getBeerName().matches("/*" + beerName + "*/i"))
                     .collect(Collectors.toList());
+        } else if (!StringUtils.hasText(beerName) && beerStyle != null) {
+            beers = beers.stream()
+                    .filter(b -> b.getBeerStyle().equals(beerStyle))
+                    .toList();
         }
         return beers;
     }
