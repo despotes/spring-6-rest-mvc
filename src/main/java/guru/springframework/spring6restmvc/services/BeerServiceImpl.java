@@ -62,9 +62,13 @@ public class BeerServiceImpl implements BeerService {
 
     @Override
     public List<BeerDTO> listBeers(String beerName) {
-        return new ArrayList<>(beerMap.values()).stream()
-                .filter(b -> b.getBeerName().equals(beerName))
-                .collect(Collectors.toList());
+        List<BeerDTO> beers = new ArrayList<>(beerMap.values());
+        if (StringUtils.hasText(beerName)) {
+            beers = beers.stream()
+                    .filter(b -> b.getBeerName().matches("/*" + beerName + "*/i"))
+                    .collect(Collectors.toList());
+        }
+        return beers;
     }
 
     @Override
