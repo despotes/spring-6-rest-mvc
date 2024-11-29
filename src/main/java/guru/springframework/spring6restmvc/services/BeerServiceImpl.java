@@ -9,6 +9,7 @@ import org.springframework.util.StringUtils;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -61,7 +62,9 @@ public class BeerServiceImpl implements BeerService {
 
     @Override
     public List<BeerDTO> listBeers(String beerName) {
-        return new ArrayList<>(beerMap.values());
+        return new ArrayList<>(beerMap.values()).stream()
+                .filter(b -> b.getBeerName().equals(beerName))
+                .collect(Collectors.toList());
     }
 
     @Override
