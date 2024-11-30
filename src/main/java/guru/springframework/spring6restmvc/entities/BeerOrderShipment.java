@@ -33,6 +33,8 @@ public class BeerOrderShipment {
     @Version
     private Long version;
 
+    private String trackingNumber;
+
     @OneToOne
     private BeerOrder beerOrder;
 
