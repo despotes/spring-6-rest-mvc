@@ -3,6 +3,9 @@ package guru.springframework.spring6restmvc.services;
 import guru.springframework.spring6restmvc.model.BeerDTO;
 import guru.springframework.spring6restmvc.model.BeerStyle;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -61,7 +64,7 @@ public class BeerServiceImpl implements BeerService {
     }
 
     @Override
-    public List<BeerDTO> listBeers(String beerName, BeerStyle beerStyle, Boolean showInventory, Integer pageNumber, Integer pageSize) {
+    public Page<BeerDTO> listBeers(String beerName, BeerStyle beerStyle, Boolean showInventory, Integer pageNumber, Integer pageSize) {
         List<BeerDTO> beers = new ArrayList<>(beerMap.values());
         if (StringUtils.hasText(beerName) && beerStyle == null) {
             beers = beers.stream()
@@ -72,7 +75,7 @@ public class BeerServiceImpl implements BeerService {
                     .filter(b -> b.getBeerStyle().equals(beerStyle))
                     .toList();
         }
-        return beers;
+        return new PageImpl<>(beers, PageRequest.of(pageNumber, pageSize), beers.size());
     }
 
     @Override
