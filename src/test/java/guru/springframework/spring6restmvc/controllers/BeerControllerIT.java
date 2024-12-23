@@ -1,6 +1,7 @@
 package guru.springframework.spring6restmvc.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.dockerjava.api.exception.UnauthorizedException;
 import guru.springframework.spring6restmvc.entities.Beer;
 import guru.springframework.spring6restmvc.mappers.BeerMapper;
 import guru.springframework.spring6restmvc.model.BeerDTO;
@@ -15,6 +16,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -83,9 +85,10 @@ class BeerControllerIT {
         beerDTO.setBeerName("Updated Name 2");
 
         MvcResult result2 = mockMvc.perform(put(BeerController.BEER_PATH_PATH_ID, beer.getId())
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .accept(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(beerDTO)))
+                        .with(httpBasic(BeerControllerTest.USERNAME, BeerControllerTest.PASSWORD))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(beerDTO)))
                 .andExpect(status().isNoContent())
                 .andReturn();
 
@@ -93,8 +96,9 @@ class BeerControllerIT {
     }
 
     @Test
-    void testListBeerStyleAndBeerNameShowInventoryTruePage2 () throws Exception {
+    void testListBeerStyleAndBeerNameShowInventoryTruePage2() throws Exception {
         mockMvc.perform(get(BeerController.BEER_PATH)
+                        .with(httpBasic(BeerControllerTest.USERNAME, BeerControllerTest.PASSWORD))
                         .queryParam("beerName", "IPA")
                         .queryParam("beerStyle", BeerStyle.IPA.name())
                         .queryParam("showInventory", "true")
@@ -105,49 +109,59 @@ class BeerControllerIT {
     }
 
     @Test
-    void testListBeerStyleAndBeerNameShowInventoryTrue () throws Exception {
+    void testListBeerStyleAndBeerNameShowInventoryTrue() throws Exception {
         mockMvc.perform(get(BeerController.BEER_PATH)
+                        .with(httpBasic(BeerControllerTest.USERNAME, BeerControllerTest.PASSWORD))
                         .queryParam("beerName", "IPA")
                         .queryParam("beerStyle", BeerStyle.IPA.name())
                         .queryParam("showInventory", "true")
-                        .queryParam("pageSize","500"))
+                        .queryParam("pageSize", "500"))
                 .andExpect(jsonPath("$.content.size()", is(310)))
                 .andExpect(jsonPath("$.content[0].quantityOnHand").value(IsNull.notNullValue()));
     }
 
     @Test
-    void testListBeerStyleAndBeerNameShowInventoryFalse () throws Exception {
+    void testListBeerStyleAndBeerNameShowInventoryFalse() throws Exception {
         mockMvc.perform(get(BeerController.BEER_PATH)
+                        .with(httpBasic(BeerControllerTest.USERNAME, BeerControllerTest.PASSWORD))
                         .queryParam("beerName", "IPA")
                         .queryParam("beerStyle", BeerStyle.IPA.name())
                         .queryParam("showInventory", "false")
-                        .queryParam("pageSize","500"))
+                        .queryParam("pageSize", "500"))
                 .andExpect(jsonPath("$.content.size()", is(310)))
                 .andExpect(jsonPath("$.content[0].quantityOnHand").value(IsNull.nullValue()));
     }
 
     @Test
-    void testListBeerStyleAndBeerName () throws Exception {
+    void testListBeerStyleAndBeerName() throws Exception {
         mockMvc.perform(get(BeerController.BEER_PATH)
+                        .with(httpBasic(BeerControllerTest.USERNAME, BeerControllerTest.PASSWORD))
                         .queryParam("beerName", "IPA")
                         .queryParam("beerStyle", BeerStyle.IPA.name())
-                .queryParam("pageSize","500"))
+                        .queryParam("pageSize", "500"))
                 .andExpect(jsonPath("$.content.size()", is(310)));
     }
 
     @Test
-    void testListBeerStyle () throws Exception {
+    void testNoAuth() throws Exception {
+        mockMvc.perform(get(BeerController.BEER_PATH)).andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void testListBeerStyle() throws Exception {
         mockMvc.perform(get(BeerController.BEER_PATH)
+                        .with(httpBasic(BeerControllerTest.USERNAME, BeerControllerTest.PASSWORD))
                         .queryParam("beerStyle", BeerStyle.IPA.name())
-                        .queryParam("pageSize","800"))
+                        .queryParam("pageSize", "800"))
                 .andExpect(jsonPath("$.content.size()", is(548)));
     }
 
     @Test
-    void testListBeersName () throws Exception {
+    void testListBeersName() throws Exception {
         mockMvc.perform(get(BeerController.BEER_PATH)
-                .queryParam("beerName", "IPA")
-                .queryParam("pageSize","500"))
+                        .with(httpBasic(BeerControllerTest.USERNAME, BeerControllerTest.PASSWORD))
+                        .queryParam("beerName", "IPA")
+                        .queryParam("pageSize", "500"))
                 .andExpect(jsonPath("$.content.size()", is(336)));
     }
 
@@ -159,6 +173,7 @@ class BeerControllerIT {
         beerMap.put("beerName", "New Name 1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890");
 
         mockMvc.perform(patch(BeerController.BEER_PATH_PATH_ID, beer.getId())
+                        .with(httpBasic(BeerControllerTest.USERNAME, BeerControllerTest.PASSWORD))
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(beerMap)))
@@ -177,7 +192,7 @@ class BeerControllerIT {
     @Rollback
     @Transactional
     @Test
-    void testPatchBeerById(){
+    void testPatchBeerById() {
         Beer beer = beerRepository.findAll().getFirst();
         BeerDTO beerDTO = beerMapper.beerToBeerDto(beer);
         beerDTO.setId(null);
@@ -196,7 +211,7 @@ class BeerControllerIT {
     @Test
     void testDeleteByIdNotFound() {
         assertThrows(NotFoundException.class, () -> {
-            ResponseEntity responseEntity =  controller.deleteById(UUID.randomUUID());
+            ResponseEntity responseEntity = controller.deleteById(UUID.randomUUID());
         });
     }
 
@@ -205,7 +220,7 @@ class BeerControllerIT {
     @Test
     void testDeleteByIdFound() {
         Beer beer = beerRepository.findAll().getFirst();
-        ResponseEntity responseEntity =  controller.deleteById(beer.getId());
+        ResponseEntity responseEntity = controller.deleteById(beer.getId());
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatusCode.valueOf(204));
         assertThat(beerRepository.findById(beer.getId())).isEmpty();
     }
@@ -239,7 +254,7 @@ class BeerControllerIT {
     @Rollback
     @Transactional
     @Test
-    void saveNewBeerTest(){
+    void saveNewBeerTest() {
         BeerDTO beerDTO = BeerDTO.builder()
                 .beerName("New Beer")
                 .build();
