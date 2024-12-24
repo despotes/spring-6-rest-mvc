@@ -52,9 +52,6 @@ class CustomerControllerTest {
     @Captor
     ArgumentCaptor<CustomerDTO> customerArgumentCaptor;
 
-    public final String USERNAME = "user1";
-    public final String PASSWORD = "password";
-
     @BeforeEach
     void setup() {
         customerServiceImpl = new CustomerServiceImpl();
@@ -69,7 +66,7 @@ class CustomerControllerTest {
         given(customerService.patchCustomer(any(), any())).willReturn(Optional.of(customer));
 
         mockMvc.perform(patch(CustomerController.CUSTOMER_PATH_PATH_ID, customer.getId())
-                        .with(httpBasic(USERNAME, PASSWORD))
+                        .with(BeerControllerTest.jwtRequestPostProcessor)
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(customerMap)))
@@ -89,7 +86,7 @@ class CustomerControllerTest {
         given(customerService.deleteCustomerById(any())).willReturn(true);
 
         mockMvc.perform(delete(CustomerController.CUSTOMER_PATH_PATH_ID, customer.getId())
-                        .with(httpBasic(USERNAME, PASSWORD))
+                        .with(BeerControllerTest.jwtRequestPostProcessor)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNoContent());
 
@@ -105,7 +102,7 @@ class CustomerControllerTest {
         given(customerService.updateCustomerById(any(), any())).willReturn(Optional.of(customer));
 
         mockMvc.perform(put(CustomerController.CUSTOMER_PATH_PATH_ID, customer.getId())
-                        .with(httpBasic(USERNAME, PASSWORD))
+                        .with(BeerControllerTest.jwtRequestPostProcessor)
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(customer)))
@@ -126,7 +123,7 @@ class CustomerControllerTest {
                 .willReturn(customerServiceImpl.listCustomers().get(1));
 
         mockMvc.perform(post(CustomerController.CUSTOMER_PATH)
-                        .with(httpBasic(USERNAME, PASSWORD))
+                        .with(BeerControllerTest.jwtRequestPostProcessor)
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(newCustomer)))
@@ -137,7 +134,7 @@ class CustomerControllerTest {
     @Test
     void getCustomerByIdNtFound() throws Exception {
         given(customerService.getCustomerById(any(UUID.class))).willReturn(Optional.empty());
-        mockMvc.perform(get(CustomerController.CUSTOMER_PATH_PATH_ID, UUID.randomUUID()).with(httpBasic(USERNAME, PASSWORD)))
+        mockMvc.perform(get(CustomerController.CUSTOMER_PATH_PATH_ID, UUID.randomUUID()).with(BeerControllerTest.jwtRequestPostProcessor))
                 .andExpect(status().isNotFound());
     }
 
@@ -148,7 +145,7 @@ class CustomerControllerTest {
         given(customerService.getCustomerById(testCustomer.getId())).willReturn(Optional.of(testCustomer));
 
         mockMvc.perform(get(CustomerController.CUSTOMER_PATH_PATH_ID, testCustomer.getId())
-                        .with(httpBasic(USERNAME, PASSWORD))
+                        .with(BeerControllerTest.jwtRequestPostProcessor)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -160,7 +157,7 @@ class CustomerControllerTest {
         given(customerService.listCustomers()).willReturn(customerServiceImpl.listCustomers());
 
         mockMvc.perform(get(CustomerController.CUSTOMER_PATH)
-                        .with(httpBasic(USERNAME, PASSWORD))
+                        .with(BeerControllerTest.jwtRequestPostProcessor)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
